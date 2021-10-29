@@ -1,18 +1,20 @@
 const mongoose = require('mongoose');
-const coachSchema = new mongoose.Schema(
+const rowSchema = new mongoose.Schema(
   {
-    name: {
+    rowLetter: {
       type: String,
+      required: true,
       unique: true,
     },
-    rows: [
+    seats: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Row',
+        ref: 'Seat', // ref to the seat model
       },
     ],
     remSeats: {
       type: Number,
+      required: true,
     },
   },
   {
@@ -20,5 +22,5 @@ const coachSchema = new mongoose.Schema(
   }
 );
 
-const Coach = mongoose.model('Coach', coachSchema);
-module.exports = Coach;
+const Row = mongoose.model('Row', rowSchema);
+module.exports = Row;

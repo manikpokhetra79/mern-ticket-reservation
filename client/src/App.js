@@ -1,25 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import React, { useState } from 'react';
+import InputComponent from './components/InputComponent';
+import Coach from './components/Coach';
+const App = () => {
+  const [seats, bookSeats] = useState(-1);
+  console.log(seats);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <InputComponent handleBooking={bookSeats} />
+      {seats > 0 && <Coach seats={seats} />}
+    </>
   );
-}
+};
 
 export default App;
