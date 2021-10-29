@@ -1,18 +1,23 @@
 import React, { useEffect } from 'react';
 import { bookingApi } from '../utils/urls';
-import axios from 'axios';
+// import axios from 'axios';
 const Coach = ({ seats }) => {
-  const s = seats;
   useEffect(() => {
     let bookSeats = () => {
-      let url = bookingApi;
-      axios
-        .post(url, s)
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err.data));
+      fetch(bookingApi, {
+        method: 'POST',
+        body: JSON.stringify({
+          seats: seats,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        });
     };
     bookSeats();
-  }, [s]);
+  }, [seats]);
   return <div></div>;
 };
 

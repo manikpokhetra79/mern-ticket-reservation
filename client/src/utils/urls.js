@@ -1,1 +1,1 @@
-export const bookingApi = 'http://localhost:8000/api/bookSeats';
+export const bookingApi = 'http://localhost:5000/api/bookSeats';

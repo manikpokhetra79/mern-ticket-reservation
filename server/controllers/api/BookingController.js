@@ -3,6 +3,8 @@ const Row = require('../../models/RowSchema');
 const Coach = require('../../models/CoachSchema');
 module.exports.bookSeats = async (req, res) => {
   let coach = await initializeDB();
+  // let obj = await JSON.parse(req.body);
+  console.log(req.body);
   return res.status(200).json({
     message: 'successfully created',
     coach: coach,
