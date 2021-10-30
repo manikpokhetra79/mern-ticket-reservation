@@ -40,9 +40,9 @@ const App = () => {
         setCoachArray(data.coach);
         if ((data.status = 'success')) {
           setSeatsArray(data.seats);
-          setTimeout(() => {
+          // setTimeout(() => {
             setLoading(false);
-          }, 500);
+          // }, 500);
         }
       })
       .catch((err) => console.log(err));

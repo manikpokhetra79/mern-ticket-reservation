@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, ListGroup, Spinner,  Button } from 'react-bootstrap';
+import { Container, ListGroup, Spinner, Button } from 'react-bootstrap';
 
 const SeatsNumber = ({
   seatsArray,
@@ -20,6 +20,7 @@ const SeatsNumber = ({
       {' '}
       <h2 className=" text-center">Booked Ticket Details</h2>
       <h2>Remaining seats : {updater ? 80 : ticketsLeft}</h2>
+      {updater && <h2> Please refresh the page</h2>}
       {remSeats === 0 && (
         <Button className="mb-3" onClick={handleButtonClick}>
           Reset Tickets for Testing Purpose
