@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const InputComponent = ({ handleBooking }) => {
-  const [input, setInput] = useState();
+  const [input, setInput] = useState(0);
 
   let handleInputChange = (e) => {
     let value = e.target.value;
@@ -13,6 +13,7 @@ const InputComponent = ({ handleBooking }) => {
     } else {
       handleBooking(input);
     }
+    setInput(0);
   };
   return (
     <>
@@ -20,8 +21,9 @@ const InputComponent = ({ handleBooking }) => {
       <input
         type="text"
         name="totalSeats"
-        placeholder="enter number of seats from 1-7"
+        placeholder="No of seats 1-7"
         onChange={handleInputChange}
+        value={input}
       />
       <button onClick={handleSubmit}>Book Seats</button>
     </>

@@ -62,12 +62,11 @@ module.exports.bookSeats = async (req, res) => {
 };
 // utility to book seats
 let fillSeats = async (rowsArray, newCoach, seats) => {
-  // let seatsTobeBooked = seats;
   for (let row of rowsArray) {
     //when row has all the required seats to be booked
     if (row.remSeats >= seats) {
       //go to the row and fill the seats
-      let seatsArray = row.seats;
+
       let length = row.totalSeats;
       let initialIndex = length - row.remSeats;
       for (let i = initialIndex; i < initialIndex + seats; i++) {
@@ -87,10 +86,39 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
       // update remSeats in row
       row.remSeats = (await row.remSeats) - seats;
       await row.save();
-
       return;
     }
   }
+  // if we didnot return it means seats are not booked
+  // that is not a single row has total of seats to be booked
+  // so we will divide seats in different rows
+  let seatsTobeBooked = seats;
+  for (let row of rowsArray) {
+    let length = row.totalSeats;
+    let initialIndex = length - row.remSeats;
+    //seats that can be booked in this array
+    let seatsBooked = length - initialIndex;
+    for (let i = initialIndex; i < length; i++) {
+      let seat = await Seat.create({
+        coach: newCoach.id,
+        seatNumber: i + 1,
+        row: row.id,
+        rowLetter: row.rowLetter,
+        status: 'booked',
+      });
+      // push seat to row array
+      await row.seats.push(seat);
+      //save row
+      await row.save();
+    }
+    row.remSeats = (await row.remSeats) - seatsBooked;
+    await row.save();
+    seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
+    if (seatsTobeBooked == 0) {
+      return;
+    }
+  }
+  return;
 };
 let initializeDB = async () => {
   try {
