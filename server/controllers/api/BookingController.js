@@ -7,6 +7,7 @@ module.exports.bookSeats = async (req, res) => {
     await initializeDB();
     let newCoach = await Coach.findOne({ name: 'railway' }).populate('rows');
     let seats = parseInt(req.body.seats);
+    console.log(req.body, 'seats to be booked');
     // use logics
     if (seats <= newCoach.remSeats) {
       let row = newCoach.rows;
@@ -17,10 +18,10 @@ module.exports.bookSeats = async (req, res) => {
         let initialIndex = length - row[11].remSeats;
 
         for (let i = initialIndex; i < initialIndex + seats; i++) {
-          console.log('i am i', i);
-          console.log(typeof initialIndex, 'initial');
-          console.log(typeof seats, 'seats');
-          console.log(initialIndex + seats, 'last boundary');
+          // console.log('i am i', i);
+          // console.log(typeof initialIndex, 'initial');
+          // console.log(typeof seats, 'seats');
+          // console.log(initialIndex + seats, 'last boundary');
           //book seats and add them to the array
           let seat = await Seat.create({
             coach: newCoach.id,
@@ -37,6 +38,7 @@ module.exports.bookSeats = async (req, res) => {
         // update remSeats in row
         row[11].remSeats = (await row[11].remSeats) - seats;
         await row[11].save();
+        console.log('booked in last row');
       } else {
         //go to all rows and check which row has required seats
         fillSeats(row, newCoach, seats);
@@ -83,12 +85,14 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
         //save row
         await row.save();
       }
+      console.log('booked completely in row');
       // update remSeats in row
       row.remSeats = (await row.remSeats) - seats;
       await row.save();
       return;
     }
   }
+
   // if we didnot return it means seats are not booked
   // that is not a single row has total of seats to be booked
   // so we will divide seats in different rows
@@ -96,8 +100,14 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
   for (let row of rowsArray) {
     let length = row.totalSeats;
     let initialIndex = length - row.remSeats;
+    let endIndex;
+    if (seatsTobeBooked >= row.remSeats) {
+      endIndex = length;
+    } else {
+      endIndex = initialIndex + seatsTobeBooked;
+    }
     //seats that can be booked in this array
-    let seatsBooked = length - initialIndex;
+    let seatsBooked = endIndex - initialIndex;
     for (let i = initialIndex; i < length; i++) {
       let seat = await Seat.create({
         coach: newCoach.id,
@@ -106,11 +116,12 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
         rowLetter: row.rowLetter,
         status: 'booked',
       });
-      // push seat to row array
+      // push seat to row array...
       await row.seats.push(seat);
-      //save row
+      //save row...
       await row.save();
     }
+    console.log('booked partially row');
     row.remSeats = (await row.remSeats) - seatsBooked;
     await row.save();
     seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
@@ -120,6 +131,8 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
   }
   return;
 };
+
+// initialize db function
 let initializeDB = async () => {
   try {
     // since there is one coach , we will be taking default coach with name as"railway"
