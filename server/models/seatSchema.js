@@ -5,12 +5,16 @@ const seatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Coach',
     },
+    row: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Row',
+    },
     seatNumber: {
       type: Number,
       required: true,
     },
-    row: {
-      type: Number,
+    rowLetter: {
+      type: String,
       required: true,
     },
     status: {

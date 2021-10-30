@@ -12,7 +12,12 @@ const rowSchema = new mongoose.Schema(
         ref: 'Seat', // ref to the seat model
       },
     ],
+
     remSeats: {
+      type: Number,
+      required: true,
+    },
+    totalSeats: {
       type: Number,
       required: true,
     },
