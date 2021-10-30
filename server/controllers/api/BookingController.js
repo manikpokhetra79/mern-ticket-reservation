@@ -108,7 +108,7 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
     }
     //seats that can be booked in this array
     let seatsBooked = endIndex - initialIndex;
-    for (let i = initialIndex; i < length; i++) {
+    for (let i = initialIndex; i < endIndex; i++) {
       let seat = await Seat.create({
         coach: newCoach.id,
         seatNumber: i + 1,
@@ -116,12 +116,13 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
         rowLetter: row.rowLetter,
         status: 'booked',
       });
+      console.log('booked partially row');
       // push seat to row array...
       await row.seats.push(seat);
       //save row...
       await row.save();
     }
-    console.log('booked partially row');
+
     row.remSeats = (await row.remSeats) - seatsBooked;
     await row.save();
     seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
