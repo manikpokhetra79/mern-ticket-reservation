@@ -9,7 +9,7 @@ module.exports.bookSeats = async (req, res) => {
 
     let newCoach = await Coach.findOne({ name: 'railway' }).populate('rows');
     let seats = parseInt(req.body.seats);
-    console.log(req.body, 'seats to be booked');
+    // console.log(req.body, 'seats to be booked');
     // use logics
     if (seats <= newCoach.remSeats) {
       let row = newCoach.rows;
@@ -39,7 +39,7 @@ module.exports.bookSeats = async (req, res) => {
         // update remSeats in row
         row[11].remSeats = (await row[11].remSeats) - seats;
         await row[11].save();
-        console.log('booked in last row');
+        // console.log('booked in last row');
         // update overall remaining seats in coach
         newCoach.remSeats = (await newCoach.remSeats) - seats;
         await newCoach.save();
@@ -100,11 +100,11 @@ let fillSeats = async (rowsArray, newCoach, seats, bookingArray) => {
           //save row
           await row.save();
         }
-        console.log('booked completely in row');
+        // console.log('booked completely in row');
         // update remSeats in row
         row.remSeats = (await row.remSeats) - seats;
         await row.save();
-        console.log(bookingArray);
+        // console.log(bookingArray);
         return bookingArray;
       }
     }
@@ -132,7 +132,7 @@ let fillSeats = async (rowsArray, newCoach, seats, bookingArray) => {
           rowLetter: row.rowLetter,
           status: 'booked',
         });
-        console.log('booked partially row');
+        // console.log('booked partially row');
         // push seat to row array...
         await row.seats.push(seat);
         // push created tickets to seatsArray
@@ -145,11 +145,11 @@ let fillSeats = async (rowsArray, newCoach, seats, bookingArray) => {
       await row.save();
       seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
       if (seatsTobeBooked == 0) {
-        console.log(bookingArray);
+        // console.log(bookingArray);
         return bookingArray;
       }
     }
-    console.log(bookingArray);
+    // console.log(bookingArray);
     return bookingArray;
   } catch (error) {
     console.log(error);
@@ -180,6 +180,7 @@ let initializeDB = async () => {
           seats: [],
           remSeats: 7,
           totalSeats: 7,
+          coach: newCoach.id,
         });
         await newCoach.rows.push(newRow);
         await newCoach.save();
@@ -191,6 +192,7 @@ let initializeDB = async () => {
         seats: [],
         remSeats: 3,
         totalSeats: 3,
+        coach: newCoach.id,
       });
       await newCoach.rows.push(newRow);
       await newCoach.save();
@@ -198,6 +200,28 @@ let initializeDB = async () => {
     return;
   } catch (error) {
     console.log('error in initialing db', error);
+    return;
+  }
+};
+// action to remove all rows and seats of coach for testing purposes
+
+module.exports.deleteAll = async (req, res) => {
+  try {
+    let newCoach = await Coach.findOne({ name: 'railway' });
+    await Seat.deleteMany({ coach: newCoach.id });
+    await Row.updateMany(
+      { coach: newCoach.id },
+      { $set: { seats: [], remSeats: 7 } }
+    );
+    await Row.updateOne({ rowLetter: 'L' }, { $set: { remSeats: 3 } });
+
+    await newCoach.updateOne({ remSeats: 80 });
+    // console.log(newCoach.remSeats);
+    return res.status(200).json({
+      message: 'coach emptied',
+    });
+  } catch (error) {
+    console.log(error);
     return;
   }
 };

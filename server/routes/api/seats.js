@@ -3,5 +3,6 @@ const router = express.Router();
 
 const bookingController = require('../../controllers/api/BookingController');
 
-router.post('/', bookingController.bookSeats);
+router.post('/bookseats', bookingController.bookSeats);
+router.delete('/deleteall', bookingController.deleteAll);
 module.exports = router;

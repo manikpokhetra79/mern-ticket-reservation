@@ -6,6 +6,10 @@ const rowSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    coach: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Coach',
+    },
     seats: [
       {
         type: mongoose.Schema.Types.ObjectId,

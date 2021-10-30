@@ -1,14 +1,29 @@
 import React from 'react';
-import { Container, ListGroup, Spinner, Alert, Button } from 'react-bootstrap';
+import { Container, ListGroup, Spinner,  Button } from 'react-bootstrap';
 
-const SeatsNumber = ({ seatsArray, loading, remSeats }) => {
+const SeatsNumber = ({
+  seatsArray,
+  loading,
+  remSeats,
+  handleDeleteAll,
+  setUpdater,
+  updater,
+}) => {
+  let ticketsLeft = remSeats;
+
+  let handleButtonClick = () => {
+    handleDeleteAll();
+    setUpdater(true);
+  };
   return (
     <>
       {' '}
       <h2 className=" text-center">Booked Ticket Details</h2>
-      <h2>Remaining seats : {remSeats}</h2>
-      {remSeats == 0 && (
-        <Button className="mb-3">Reset Tickets for Testing Purpose</Button>
+      <h2>Remaining seats : {updater ? 80 : ticketsLeft}</h2>
+      {remSeats === 0 && (
+        <Button className="mb-3" onClick={handleButtonClick}>
+          Reset Tickets for Testing Purpose
+        </Button>
       )}
       {loading ? (
         <Spinner animation="border" role="status">
@@ -17,7 +32,7 @@ const SeatsNumber = ({ seatsArray, loading, remSeats }) => {
       ) : (
         <Container>
           <ListGroup>
-            {seatsArray ? (
+            {seatsArray &&
               seatsArray.map((seat, index) => (
                 <ListGroup.Item key={index}>
                   <p className="fs-6">
@@ -29,10 +44,7 @@ const SeatsNumber = ({ seatsArray, loading, remSeats }) => {
                     </span>
                   </p>
                 </ListGroup.Item>
-              ))
-            ) : (
-              <Alert variant="danger">Entered Tickets Not Available</Alert>
-            )}
+              ))}
           </ListGroup>
         </Container>
       )}

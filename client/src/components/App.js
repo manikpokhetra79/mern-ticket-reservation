@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { bookingApi } from '../utils/urls';
+import { bookingApi, deleteSeatsApi } from '../utils/urls';
 import {
   Container,
   Row,
@@ -9,15 +9,22 @@ import {
   FormControl,
 } from 'react-bootstrap';
 import SeatsNumber from './SeatsNumber';
+
 const App = () => {
   const [seats, setSeats] = useState(0);
   const [seatsArray, setSeatsArray] = useState([]);
   const [coachArray, setCoachArray] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [updater, setUpdater] = useState(false);
 
   let handleInputChange = (e) => {
     let value = e.target.value;
     setSeats(value);
+  };
+  let handleDeleteAll = () => {
+    fetch(deleteSeatsApi, {
+      method: 'DELETE',
+    }).catch((err) => console.log(err));
   };
   let bookSeats = () => {
     fetch(bookingApi, {
@@ -37,7 +44,9 @@ const App = () => {
             setLoading(false);
           }, 500);
         }
-      });
+      })
+      .catch((err) => console.log(err));
+    setUpdater(false);
   };
   let handleSubmit = () => {
     if (seats > 7 || seats < 1) {
@@ -74,7 +83,10 @@ const App = () => {
           <SeatsNumber
             seatsArray={seatsArray}
             loading={loading}
-            remSeats={ coachArray.remSeats }
+            remSeats={coachArray.remSeats}
+            handleDeleteAll={handleDeleteAll}
+            setUpdater={setUpdater}
+            updater={updater}
           />
         </Row>
       </Container>
