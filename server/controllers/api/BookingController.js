@@ -47,6 +47,7 @@ module.exports.bookSeats = async (req, res) => {
           message: 'successfully created',
           coach: newCoach,
           seats: seatsArray,
+          status: 'success',
         });
       } else {
         //go to all rows and check which row has required seats
@@ -65,7 +66,7 @@ module.exports.bookSeats = async (req, res) => {
     } else {
       return res.status(400).json({
         message: 'Not enough seats',
-        coach: newCoach,
+        status: 'error',
       });
     }
   } catch (error) {

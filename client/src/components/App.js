@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { bookingApi } from '../utils/urls';
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  InputGroup,
+  FormControl,
+} from 'react-bootstrap';
+import SeatsNumber from './SeatsNumber';
 const App = () => {
   const [seats, setSeats] = useState(0);
-
+  const [seatsArray, setSeatsArray] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [bookingError, showBookingError] = useState(false);
   let handleInputChange = (e) => {
     let value = e.target.value;
     setSeats(value);
@@ -18,22 +29,57 @@ const App = () => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        if ((data.status = 'success')) {
+          setSeatsArray(data.seats);
+          setTimeout(() => {
+            setLoading(false);
+          }, 1000);
+        } else {
+          showBookingError(true);
+        }
       });
   };
   let handleSubmit = () => {
-    //fetch api
-    bookSeats();
+    if (seats > 7 || seats < 1) {
+      alert('Please enter numbers from 1 - 7 only');
+    } else {
+      //fetch api
+      bookSeats();
+      setLoading(true);
+    }
   };
   return (
     <>
       {' '}
-      <input
-        type="text"
-        name="totalSeats"
-        placeholder="No of seats 1-7"
-        onChange={handleInputChange}
-      />
-      <button onClick={handleSubmit}>Book Seats</button>
+      <Container>
+        <Row>
+          <h1 className="text-primary mt-5 text-center">
+            Railway Ticket Booking
+          </h1>
+        </Row>
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <FormControl
+                type="text"
+                name="totalSeats"
+                placeholder="No of seats 1-7"
+                onChange={handleInputChange}
+              />
+              <Button onClick={handleSubmit}>Book Seats</Button>
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row>
+          {seatsArray && (
+            <SeatsNumber
+              seatsArray={seatsArray}
+              loading={loading}
+              bookingError={bookingError}
+            />
+          )}
+        </Row>
+      </Container>
     </>
   );
 };
