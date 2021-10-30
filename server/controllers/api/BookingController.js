@@ -1,10 +1,12 @@
 const Seat = require('../../models/seatSchema');
 const Row = require('../../models/RowSchema');
 const Coach = require('../../models/CoachSchema');
+
 module.exports.bookSeats = async (req, res) => {
   try {
     //initialize the db
     await initializeDB();
+
     let newCoach = await Coach.findOne({ name: 'railway' }).populate('rows');
     let seats = parseInt(req.body.seats);
     console.log(req.body, 'seats to be booked');
@@ -13,15 +15,12 @@ module.exports.bookSeats = async (req, res) => {
       let row = newCoach.rows;
       // seat booking logic starts here
       if (row[11].remSeats >= seats) {
+        let seatsArray = [];
         //fill seats in last row
         let length = row[11].totalSeats;
         let initialIndex = length - row[11].remSeats;
 
         for (let i = initialIndex; i < initialIndex + seats; i++) {
-          // console.log('i am i', i);
-          // console.log(typeof initialIndex, 'initial');
-          // console.log(typeof seats, 'seats');
-          // console.log(initialIndex + seats, 'last boundary');
           //book seats and add them to the array
           let seat = await Seat.create({
             coach: newCoach.id,
@@ -32,6 +31,8 @@ module.exports.bookSeats = async (req, res) => {
           });
           // push seat to row array
           await row[11].seats.push(seat);
+          // push created tickets to seatsArray
+          seatsArray.push(seat);
           //save row
           await row[11].save();
         }
@@ -39,40 +40,89 @@ module.exports.bookSeats = async (req, res) => {
         row[11].remSeats = (await row[11].remSeats) - seats;
         await row[11].save();
         console.log('booked in last row');
+        // update overall remaining seats in coach
+        newCoach.remSeats = (await newCoach.remSeats) - seats;
+        await newCoach.save();
+        return res.status(200).json({
+          message: 'successfully created',
+          coach: newCoach,
+          seats: seatsArray,
+        });
       } else {
         //go to all rows and check which row has required seats
-        fillSeats(row, newCoach, seats);
+        let bookingArray = [];
+        bookingArray = await fillSeats(row, newCoach, seats, bookingArray);
+        // update overall remaining seats in coach
+        newCoach.remSeats = (await newCoach.remSeats) - seats;
+        await newCoach.save();
+        return res.status(200).json({
+          message: 'successfully created',
+          coach: newCoach,
+          seats: bookingArray,
+        });
       }
       // seat booking logic ends here //
-      // update overall remaining seats in coach
-      newCoach.remSeats = (await newCoach.remSeats) - seats;
-      await newCoach.save();
     } else {
       return res.status(400).json({
         message: 'Not enough seats',
         coach: newCoach,
       });
     }
-
-    return res.status(200).json({
-      message: 'successfully created',
-      coach: newCoach,
-    });
   } catch (error) {
     console.log('error in', error);
   }
 };
 // utility to book seats
-let fillSeats = async (rowsArray, newCoach, seats) => {
-  for (let row of rowsArray) {
-    //when row has all the required seats to be booked
-    if (row.remSeats >= seats) {
-      //go to the row and fill the seats
+let fillSeats = async (rowsArray, newCoach, seats, bookingArray) => {
+  try {
+    for (let row of rowsArray) {
+      //when row has all the required seats to be booked
+      if (row.remSeats >= seats) {
+        //go to the row and fill the seats
+        let length = row.totalSeats;
+        let initialIndex = length - row.remSeats;
+        for (let i = initialIndex; i < initialIndex + seats; i++) {
+          // create seats
+          let seat = await Seat.create({
+            coach: newCoach.id,
+            seatNumber: i + 1,
+            row: row.id,
+            rowLetter: row.rowLetter,
+            status: 'booked',
+          });
+          // push seat to row array
+          await row.seats.push(seat);
+          // push created tickets to seatsArray
 
+          bookingArray.push(seat);
+          //save row
+          await row.save();
+        }
+        console.log('booked completely in row');
+        // update remSeats in row
+        row.remSeats = (await row.remSeats) - seats;
+        await row.save();
+        console.log(bookingArray);
+        return bookingArray;
+      }
+    }
+
+    // if we didnot return it means seats are not booked
+    // that is not a single row has total of seats to be booked
+    // so we will divide seats in different rows
+    let seatsTobeBooked = seats;
+    for (let row of rowsArray) {
       let length = row.totalSeats;
       let initialIndex = length - row.remSeats;
-      for (let i = initialIndex; i < initialIndex + seats; i++) {
-        // create seats
+      let endIndex;
+      if (seatsTobeBooked >= row.remSeats) {
+        endIndex = length;
+      } else {
+        endIndex = initialIndex + seatsTobeBooked;
+      }
+      //seats that can be booked in this array
+      let seatsBooked = endIndex - initialIndex;
+      for (let i = initialIndex; i < endIndex; i++) {
         let seat = await Seat.create({
           coach: newCoach.id,
           seatNumber: i + 1,
@@ -80,57 +130,28 @@ let fillSeats = async (rowsArray, newCoach, seats) => {
           rowLetter: row.rowLetter,
           status: 'booked',
         });
-        // push seat to row array
+        console.log('booked partially row');
+        // push seat to row array...
         await row.seats.push(seat);
-        //save row
+        // push created tickets to seatsArray
+        bookingArray.push(seat);
+        //save row...
         await row.save();
       }
-      console.log('booked completely in row');
-      // update remSeats in row
-      row.remSeats = (await row.remSeats) - seats;
-      await row.save();
-      return;
-    }
-  }
 
-  // if we didnot return it means seats are not booked
-  // that is not a single row has total of seats to be booked
-  // so we will divide seats in different rows
-  let seatsTobeBooked = seats;
-  for (let row of rowsArray) {
-    let length = row.totalSeats;
-    let initialIndex = length - row.remSeats;
-    let endIndex;
-    if (seatsTobeBooked >= row.remSeats) {
-      endIndex = length;
-    } else {
-      endIndex = initialIndex + seatsTobeBooked;
-    }
-    //seats that can be booked in this array
-    let seatsBooked = endIndex - initialIndex;
-    for (let i = initialIndex; i < endIndex; i++) {
-      let seat = await Seat.create({
-        coach: newCoach.id,
-        seatNumber: i + 1,
-        row: row.id,
-        rowLetter: row.rowLetter,
-        status: 'booked',
-      });
-      console.log('booked partially row');
-      // push seat to row array...
-      await row.seats.push(seat);
-      //save row...
+      row.remSeats = (await row.remSeats) - seatsBooked;
       await row.save();
+      seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
+      if (seatsTobeBooked == 0) {
+        console.log(bookingArray);
+        return bookingArray;
+      }
     }
-
-    row.remSeats = (await row.remSeats) - seatsBooked;
-    await row.save();
-    seatsTobeBooked = (await seatsTobeBooked) - seatsBooked;
-    if (seatsTobeBooked == 0) {
-      return;
-    }
+    console.log(bookingArray);
+    return bookingArray;
+  } catch (error) {
+    console.log(error);
   }
-  return;
 };
 
 // initialize db function
