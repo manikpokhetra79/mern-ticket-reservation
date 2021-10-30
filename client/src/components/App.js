@@ -12,8 +12,9 @@ import SeatsNumber from './SeatsNumber';
 const App = () => {
   const [seats, setSeats] = useState(0);
   const [seatsArray, setSeatsArray] = useState([]);
+  const [coachArray, setCoachArray] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [bookingError, showBookingError] = useState(false);
+
   let handleInputChange = (e) => {
     let value = e.target.value;
     setSeats(value);
@@ -29,13 +30,12 @@ const App = () => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        setCoachArray(data.coach);
         if ((data.status = 'success')) {
           setSeatsArray(data.seats);
           setTimeout(() => {
             setLoading(false);
-          }, 1000);
-        } else {
-          showBookingError(true);
+          }, 500);
         }
       });
   };
@@ -71,13 +71,11 @@ const App = () => {
           </Col>
         </Row>
         <Row>
-          {seatsArray && (
-            <SeatsNumber
-              seatsArray={seatsArray}
-              loading={loading}
-              bookingError={bookingError}
-            />
-          )}
+          <SeatsNumber
+            seatsArray={seatsArray}
+            loading={loading}
+            remSeats={ coachArray.remSeats }
+          />
         </Row>
       </Container>
     </>

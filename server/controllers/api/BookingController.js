@@ -67,6 +67,7 @@ module.exports.bookSeats = async (req, res) => {
       return res.status(400).json({
         message: 'Not enough seats',
         status: 'error',
+        coach: newCoach,
       });
     }
   } catch (error) {
