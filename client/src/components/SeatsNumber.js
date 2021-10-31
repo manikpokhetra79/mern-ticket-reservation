@@ -20,7 +20,7 @@ const SeatsNumber = ({
       {' '}
       <Container>
         {' '}
-        <Button className="mb-3" onClick={handleButtonClick}>
+        <Button className="mb-3 mt-5" onClick={handleButtonClick}>
           Reset Tickets for Testing Purpose
         </Button>
       </Container>

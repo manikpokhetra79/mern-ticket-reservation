@@ -11,7 +11,6 @@ import {
 import SeatsNumber from './SeatsNumber';
 
 const App = () => {
-  
   const [seats, setSeats] = useState(0);
   const [seatsArray, setSeatsArray] = useState([]);
   const [coachArray, setCoachArray] = useState([]);
@@ -26,6 +25,7 @@ const App = () => {
     fetch(deleteSeatsApi, {
       method: 'DELETE',
     }).catch((err) => console.log(err));
+    setSeatsArray([]);
   };
   let bookSeats = () => {
     fetch(bookingApi, {
@@ -42,7 +42,7 @@ const App = () => {
         if ((data.status = 'success')) {
           setSeatsArray(data.seats);
           // setTimeout(() => {
-            setLoading(false);
+          setLoading(false);
           // }, 500);
         }
       })
@@ -63,13 +63,11 @@ const App = () => {
       {' '}
       <Container>
         <Row>
-          <h1 className="text-primary mt-5 text-center">
-            Railway Ticket Booking
-          </h1>
-        </Row>
-        <Row>
-          <Col>
-            <InputGroup className="mb-3">
+          <Col md={6} sm={12}>
+            <h1 className="text-primary mt-5 text-center">
+              Railway Ticket Booking
+            </h1>
+            <InputGroup className="mb-3 mt-5">
               <FormControl
                 type="text"
                 name="totalSeats"
@@ -79,7 +77,28 @@ const App = () => {
               <Button onClick={handleSubmit}>Book Seats</Button>
             </InputGroup>
           </Col>
+          <Col md={6} sm={12}>
+            {' '}
+            <ul className="mt-5">
+              <h2>Notes </h2>
+              <li>Total Seats : 80</li>
+              <li>You can book only 1-7 input at one time</li>
+              <li>
+                Remaining seats will be shown once user has booked some tickets
+              </li>
+              <li>Output will be the Seat Number along with its Status</li>
+              <li>
+                You can reset tickets Database by clicking on{' '}
+                <b className="text-primary">
+                  Reset Tickets for Testing Purpose{' '}
+                </b>
+                Button
+              </li>
+              <li>After resetting Database, please refresh the page.</li>
+            </ul>
+          </Col>
         </Row>
+
         <Row>
           <SeatsNumber
             seatsArray={seatsArray}
