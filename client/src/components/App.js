@@ -11,6 +11,7 @@ import {
 import SeatsNumber from './SeatsNumber';
 
 const App = () => {
+  
   const [seats, setSeats] = useState(0);
   const [seatsArray, setSeatsArray] = useState([]);
   const [coachArray, setCoachArray] = useState([]);
