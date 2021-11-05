@@ -77,9 +77,39 @@ module.exports.bookSeats = async (req, res) => {
 // utility to book seats
 let fillSeats = async (rowsArray, newCoach, seats, bookingArray) => {
   try {
+    // loop to check if any row has exact number of seats
+    for (let row of rowsArray) {
+      if (row.remSeats === seats) {
+        let length = row.totalSeats;
+        let initialIndex = length - row.remSeats;
+        for (let i = initialIndex; i < length; i++) {
+          // create seats
+          let seat = await Seat.create({
+            coach: newCoach.id,
+            seatNumber: i + 1,
+            row: row.id,
+            rowLetter: row.rowLetter,
+            status: 'booked',
+          });
+          // push seat to row array
+          await row.seats.push(seat);
+          // push created tickets to seatsArray
+
+          bookingArray.push(seat);
+          //save row
+          await row.save();
+        }
+        // console.log('booked completely in row');
+        // update remSeats in row
+        row.remSeats = (await row.remSeats) - seats;
+        await row.save();
+        // console.log(bookingArray);
+        return bookingArray;
+      }
+    }
     for (let row of rowsArray) {
       //when row has all the required seats to be booked
-      if (row.remSeats >= seats) {
+      if (row.remSeats > seats) {
         //go to the row and fill the seats
         let length = row.totalSeats;
         let initialIndex = length - row.remSeats;
