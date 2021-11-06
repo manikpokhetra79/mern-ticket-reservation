@@ -13,55 +13,19 @@ module.exports.bookSeats = async (req, res) => {
     // use logics
     if (seats <= newCoach.remSeats) {
       let row = newCoach.rows;
-      // seat booking logic starts here
-      if (row[11].remSeats >= seats) {
-        let seatsArray = [];
-        //fill seats in last row
-        let length = row[11].totalSeats;
-        let initialIndex = length - row[11].remSeats;
 
-        for (let i = initialIndex; i < initialIndex + seats; i++) {
-          //book seats and add them to the array
-          let seat = await Seat.create({
-            coach: newCoach.id,
-            seatNumber: i + 1,
-            row: row[11].id,
-            rowLetter: row[11].rowLetter,
-            status: 'booked',
-          });
-          // push seat to row array
-          await row[11].seats.push(seat);
-          // push created tickets to seatsArray
-          seatsArray.push(seat);
-          //save row
-          await row[11].save();
-        }
-        // update remSeats in row
-        row[11].remSeats = (await row[11].remSeats) - seats;
-        await row[11].save();
-        // console.log('booked in last row');
-        // update overall remaining seats in coach
-        newCoach.remSeats = (await newCoach.remSeats) - seats;
-        await newCoach.save();
-        return res.status(200).json({
-          message: 'successfully created',
-          coach: newCoach,
-          seats: seatsArray,
-          status: 'success',
-        });
-      } else {
-        //go to all rows and check which row has required seats
-        let bookingArray = [];
-        bookingArray = await fillSeats(row, newCoach, seats, bookingArray);
-        // update overall remaining seats in coach
-        newCoach.remSeats = (await newCoach.remSeats) - seats;
-        await newCoach.save();
-        return res.status(200).json({
-          message: 'successfully created',
-          coach: newCoach,
-          seats: bookingArray,
-        });
-      }
+      //go to all rows and check which row has required seats
+      let bookingArray = [];
+      bookingArray = await fillSeats(row, newCoach, seats, bookingArray);
+      // update overall remaining seats in coach
+      newCoach.remSeats = (await newCoach.remSeats) - seats;
+      await newCoach.save();
+      return res.status(200).json({
+        message: 'successfully created',
+        coach: newCoach,
+        seats: bookingArray,
+      });
+      // }
       // seat booking logic ends here //
     } else {
       return res.status(400).json({

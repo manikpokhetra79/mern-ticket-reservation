@@ -9,10 +9,14 @@ import {
   FormControl,
 } from 'react-bootstrap';
 import SeatsNumber from './SeatsNumber';
+import CoachScreen from './CoachScreen';
 
 const App = () => {
+  //seats to be booked
   const [seats, setSeats] = useState(0);
+
   const [seatsArray, setSeatsArray] = useState([]);
+
   const [coachArray, setCoachArray] = useState([]);
   const [loading, setLoading] = useState(false);
   const [updater, setUpdater] = useState(false);
@@ -108,6 +112,11 @@ const App = () => {
             setUpdater={setUpdater}
             updater={updater}
           />
+        </Row>
+        <Row>
+          <Col>
+            {/* <CoachScreen coach={coachArray} seats={seatsArray} /> */}
+          </Col>
         </Row>
       </Container>
     </>
